@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docker Sandboxes"
+  short_description: "Set up, configure, troubleshoot, and extend sbx"
+  default_prompt: "Use $sbx to help me set up and use Docker Sandboxes safely and productively."
