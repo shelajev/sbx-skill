@@ -35,6 +35,7 @@ Useful Docker resources:
 - [Docker Sandboxes documentation](https://docs.docker.com/ai/sandboxes/)
 - [FAQ](https://docs.docker.com/ai/sandboxes/faq/)
 - [Release notes](https://docs.docker.com/ai/sandboxes/release-notes/)
+- [`sbx-releases`: stable, RC, and nightly releases](https://github.com/docker/sbx-releases/releases)
 - [GitHub repository](https://github.com/docker/sbx)
 
 ## License

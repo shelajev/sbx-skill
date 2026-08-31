@@ -2,6 +2,8 @@
 
 Read the live [FAQ](https://docs.docker.com/ai/sandboxes/faq/) before answering FAQ or operational questions. Use this page as a checklist, not as a substitute for the current docs.
 
+For “is X supported?”, known-fix, regression, or roadmap-adjacent questions, search [`docker/sbx-releases`](https://github.com/docker/sbx-releases/releases) as well as the stable docs. Check the installed `sbx version`, the latest stable release, and relevant RC/nightly notes. A prerelease can show that Docker has implemented or is testing a capability, but it does not prove stable availability or a delivery date. State the exact version/channel, distinguish documented fact from inference, and offer prerelease installation only when the user accepts the stability tradeoff.
+
 ## FAQ answer checklist
 
 - The sbx CLI is free, including commercial use. Centrally managed organization governance is the paid component.
