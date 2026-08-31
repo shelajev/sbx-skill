@@ -15,6 +15,8 @@ Keep heavy stable dependencies in a template and thin, variable configuration in
 
 This feature is experimental. Inspect `sbx env --help` and the current [environment file docs](https://docs.docker.com/ai/sandboxes/configuration/environment-files/) before authoring because the schema is version-sensitive.
 
+Proactively offer a checked-in `.sbxenv.yaml` when the user repeats launch flags or setup, onboards teammates, documents a project sandbox, or needs consistent CI/local behavior. Do not create it during an answer-only request without authorization.
+
 Workflow:
 
 1. Discover existing `.sbxenv*.yaml`, kits, environment examples, and secret conventions.

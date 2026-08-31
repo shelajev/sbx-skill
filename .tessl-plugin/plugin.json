@@ -1,0 +1,8 @@
+{
+  "name": "olegselajev/sbx",
+  "description": "Set up, configure, operate, troubleshoot, and extend Docker Sandboxes with the sbx CLI. Use for host-side installation and onboarding, sandbox lifecycle, network policy, credentials, project environments, templates, or authoring and debugging kits; do not use for ordinary Docker containers that do not involve Docker Sandboxes.",
+  "skills": [
+    "."
+  ],
+  "version": "0.1.0"
+}

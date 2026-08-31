@@ -34,6 +34,12 @@ Run `sbx` with no arguments, or `sbx tui`, to open the interactive dashboard. It
 
 Prefer the dashboard when interactively onboarding a tool: keep the network panel visible, exercise one tool operation at a time, and review each attempted destination before allowing it. Prefer CLI policy commands when the process must be reproducible or auditable.
 
+Do not leave the dashboard running by habit. After monitoring or onboarding is complete, suggest closing it when resource pressure or terminal overhead matters; this is a practical mitigation, not a claim that the dashboard is always the cause.
+
+## Editors and other apps
+
+When the user wants VS Code, Cursor, Claude Desktop, ChatGPT, T3 Code, or another SSH-capable app, read the current [integration guide](https://docs.docker.com/ai/sandboxes/integrations/). Prefer `sbx setup ssh` and a named `<sandbox>.sbx` target over installing the whole app inside the sandbox. Explain that setup edits the host SSH configuration, the sandbox must already exist, stopped sandboxes may start on connection, the workspace may need to be selected manually by its absolute path, and SSH does not forward host environment variables.
+
 ## Workspace safety
 
 Direct mount gives the sandboxed agent read/write access to the host workspace. The VM isolates the agent from the rest of the host, not from mounted files. After an agent touches an untrusted project, review Git hooks, build scripts, CI workflows, IDE tasks, agent settings, and `.sbxenv.yaml` before executing them on the host.
