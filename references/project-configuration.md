@@ -1,45 +1,28 @@
 # Project configuration
 
-Use this reference for choosing among project environment files, kits, and templates.
-
-## Choose the right layer
-
-- `.sbxenv.yaml`: checked-in declaration of how a project launches—agent, workspace, kits, environment values, secret provisioning references, registries, ports, and resources. Best for one-command contributor onboarding.
-- Mixin kit: portable runtime capability or team policy layer applied to agents—tools, files, instructions, network rules, and credential declarations.
-- Sandbox kit: a new agent definition and runtime.
-- Template: reusable image with heavy system packages, language toolchains, or large dependencies baked in for faster creation.
-
-Keep heavy stable dependencies in a template and thin, variable configuration in a kit/environment file. Do not introduce all three layers for a simple project.
+Use this reference for environment files, sandbox skill sharing, templates, and choosing a reusable layer.
 
 ## Environment files
 
-This feature is experimental. Inspect `sbx env --help` and the current [environment file docs](https://docs.docker.com/ai/sandboxes/configuration/environment-files/) before authoring because the schema is version-sensitive.
+Inspect `sbx env --help` and the current [environment-file documentation](https://docs.docker.com/ai/sandboxes/configuration/environment-files/) before choosing a filename or schema.
 
-Proactively offer a checked-in `.sbxenv.yaml` when the user repeats launch flags or setup, onboards teammates, documents a project sandbox, or needs consistent CI/local behavior. Do not create it during an answer-only request without authorization.
+- Stable v0.39 directory discovery uses `.sbxenv.yaml` (with `.sbxenv.yml` fallback).
+- [v0.42 RC/current main](https://github.com/docker/sbx-releases/releases/tag/v0.42.0-rc3) directory discovery uses `sbxenv.yaml`; rc3 prefers the non-hidden file when both forms exist. Do not assume a hidden stable file will be discovered by newer builds. Pass an explicit path when supported and appropriate.
 
-Workflow:
+Offer a checked-in environment file when launch setup is repeated or shared, but do not create one during an answer-only request. Discover existing environment files, kits, and secret conventions first.
 
-1. Discover existing `.sbxenv*.yaml`, kits, environment examples, and secret conventions.
-2. Keep the shared file portable. Put machine-specific paths or optional local overrides in supported host-variable references or an uncommitted override file.
-3. Never commit secret values. Be especially careful with secret or registry values sourced by `command`: those commands execute on the host as the user before the sandbox exists. Review them as trusted host code.
-4. Validate through the installed CLI before launching.
-5. Prefer `sbx env run` for normal attach/create behavior, `env exec` for automation, and `env rm` for resources owned by that environment, subject to current CLI semantics.
-6. Document only prerequisites the CLI cannot discover, such as a required host secret name or organization access.
+Environment files may change host state and, in v0.42 RC/main, can run `lifecycle` commands with the host user's privileges. For an unfamiliar file, use `sbx env plan` as the primary read-only inspection before applying it when that command exists. Review every host command, credential/binding, workspace, kit, port, and affected sandbox; do not suppress confirmation merely for convenience. Never commit secret values.
 
-## Templates
+## Sandbox skills (v0.42 RC/main)
 
-Use a Dockerfile extending the correct official sandbox template variant. The runtime agent passed to sbx must match that variant. Fully qualify registry image names when sbx requires it. Keep the resulting image non-secret and ensure the `agent` user/runtime requirements from the current template documentation remain intact.
+When `sbx skills --help` exists, use it as the source of truth for `add`, `update`, `ls`, `rm`, and `import`. Skill installation happens on the host; sharing makes selected skills visible in a sandbox but does not grant its agent access to the host `sbx` CLI.
 
-Before loading, pushing, or using a template, explain registry and network implications. Template cache and reset behavior may vary; inspect current `sbx template --help` and [template docs](https://docs.docker.com/ai/sandboxes/customize/templates/).
+Newer environment workflows share imported skills read-only by default and expose `--skills=off|readonly|readwrite`. Prefer `readonly`; use `readwrite` only when the user intends sandbox changes to propagate to the shared store. Do not offer this surface on stable versions whose help lacks it.
 
-## Completion check
+## Choose the reusable layer
 
-A good project setup lets a new contributor, after installing and signing in to sbx, launch predictably with one documented command. Confirm:
+- Environment file: project-specific launch and resource configuration.
+- Mixin or sandbox kit: a portable capability or agent runtime used across projects.
+- Template: a large, stable filesystem/toolchain expensive to recreate.
 
-- the selected agent starts;
-- workspace mode is intentional;
-- required tools are present without repeated slow setup;
-- network policy permits only known dependencies;
-- credentials stay host-side;
-- ports/resources are explicit where needed;
-- teardown affects only the declared environment.
+Keep credentials host-side and inspect current template/kit help before mutating registries, sandbox state, or shared artifacts.

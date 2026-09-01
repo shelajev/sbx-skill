@@ -1,68 +1,28 @@
 # Network policy
 
-Use this reference for network configuration, blocked requests, authenticated egress, proxies, and policy review.
+Use this reference for blocked requests, policy changes, governance, proxies, ports, and authenticated egress. Inspect current network-policy docs and `sbx policy --help` before changing rules.
 
-## Mental model
+## Invariants
 
-Sandbox outbound TCP traffic is mediated by host-side proxies and evaluated against policy. Direct external UDP and ICMP remain blocked. HTTP proxy environment variables are managed by sbx; do not overwrite `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, or lowercase equivalents in kits.
+- Deny wins over allow. With organization governance active, only organization allows grant access; local and kit denies can restrict further but their allows cannot broaden access.
+- Host-managed proxies enforce sandbox egress and inject supported credentials. Do not overwrite sbx-managed proxy environment variables or put tokens in environment files, kits, URLs, or sandbox files.
+- Prefer sandbox scope for one-project access and kit policy only when access belongs to every user of that capability.
 
-Rules may come from local policy, a kit, or organization governance. Deny wins over allow. With organization governance active, only organization allow rules grant access; local and kit allow rules are inactive, while their deny rules still restrict.
+## Narrow workflow
 
-## Safe workflow
+1. Preserve the exact failed request and inspect current rules, governance status, and policy logs using installed syntax.
+2. Check the specific hostname and port before mutation. Account for redirects, API/resource hosts, authentication endpoints, registries, and CDNs without guessing a broad allowlist.
+3. Identify the destination's owner and purpose. Ask when trust or required scope is unclear.
+4. Add the narrowest rule at the narrowest useful scope. Quote wildcard resources and confirm current wildcard semantics before using them.
+5. Repeat the original operation and re-inspect policy evidence. Do not escalate to unrestricted egress merely because the first rule was incomplete.
 
-Inspect the installed syntax first:
+Authenticated traffic needs both network permission and a credential binding. Keep the value in the host-side store and verify access without exposing it.
 
-```sh
-sbx policy --help
-sbx policy ls --wide
-sbx policy ls --include-inactive
-```
+## Diagnostic distinctions
 
-For new unmanaged hosts, Balanced is the usual preset:
+- If a rule is inactive, inspect organization governance rather than repeatedly adding local allows.
+- If a sandbox shell works but a nested container fails, inspect the proxy path and which proxy settings reached the container.
+- For corporate networks, configure the upstream proxy on the host using current documentation; do not replace sandbox proxy variables.
+- SSH, UDP, ICMP, published ports, and cloud networking have version/channel-specific semantics. Check relevant help and docs rather than generalizing from ordinary HTTPS egress.
 
-```sh
-sbx policy init balanced
-```
-
-Do not change an existing preset merely because another would also work. Test a target before adding a rule:
-
-```sh
-sbx policy check network api.example.com
-sbx policy check network --sandbox <name> api.example.com:443
-```
-
-Add the narrowest rule at the narrowest useful scope:
-
-```sh
-sbx policy allow network --sandbox <name> api.example.com:443
-sbx policy deny network --sandbox <name> telemetry.example.com
-```
-
-Then re-run `check` and the failing operation. Use `sbx policy log` to discover redirects, CDN endpoints, package registries, or transparent-proxy traffic; do not guess a large allowlist. Quote wildcard resources so the host shell does not expand them. Understand wildcard semantics from the current [network policy docs](https://docs.docker.com/ai/sandboxes/governance/access-controls/network/) before choosing `*.` versus `**.`.
-
-Global rules affect current and future sandboxes. Prefer `--sandbox` for a one-project need and kit policy for a capability that should travel with a kit. Use current CLI help for removal and inspection syntax.
-
-## Kit policy and credentials
-
-In schema v2 kits, network policy belongs under:
-
-```yaml
-permissions:
-  network:
-    allow:
-      - api.example.com
-    deny:
-      - telemetry.example.com
-```
-
-An authenticated destination needs both network permission and a credential declaration/binding. Prefer proxy-managed credential injection so the real secret stays on the host. Never encode a token in `environment.variables`, static files, install commands, or URLs.
-
-## Troubleshooting signals
-
-- Rule appears inactive: inspect the governance status and `--include-inactive`; an organization admin may need to allow the target.
-- HTTPS works from the sandbox shell but not a nested container: inspect the proxy path and whether proxy variables reached the container.
-- Package install fails: inspect logs for every contacted host, including redirects and artifact/CDN hosts.
-- SSH fails: TCP port 22 needs an explicit matching rule; UDP cannot be enabled.
-- Corporate network fails: configure the upstream proxy on the host according to the current [upstream proxy docs](https://docs.docker.com/ai/sandboxes/configuration/upstream-proxy/), not by replacing sandbox proxy variables.
-
-Record why each added domain is needed. If the observed host is dynamic or overly broad, ask whether the convenience/security tradeoff is acceptable.
+Record why each added destination is required so the resulting policy remains reviewable.
