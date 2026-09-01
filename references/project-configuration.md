@@ -6,18 +6,20 @@ Use this reference for environment files, sandbox skill sharing, templates, and 
 
 Inspect `sbx env --help` and the current [environment-file documentation](https://docs.docker.com/ai/sandboxes/configuration/environment-files/) before choosing a filename or schema.
 
-- Stable v0.39 directory discovery uses `.sbxenv.yaml` (with `.sbxenv.yml` fallback).
-- [v0.42 RC/current main](https://github.com/docker/sbx-releases/releases/tag/v0.42.0-rc3) directory discovery uses `sbxenv.yaml`; rc3 prefers the non-hidden file when both forms exist. Do not assume a hidden stable file will be discovered by newer builds. Pass an explicit path when supported and appropriate.
+- v0.39 directory discovery uses `.sbxenv.yaml` (with `.sbxenv.yml` fallback).
+- [v0.42.0-rc3](https://github.com/docker/sbx-releases/releases/tag/v0.42.0-rc3) prefers `sbxenv.yaml` when both hidden and non-hidden forms exist. Do not assume one channel's discovery behavior on another; pass an explicit path when supported and appropriate.
 
-Offer a checked-in environment file when launch setup is repeated or shared, but do not create one during an answer-only request. Discover existing environment files, kits, and secret conventions first.
+An environment file is host-trusted code, even when it comes from a familiar repository. It can declare a dynamic `secrets.command` that the host executes; newer schemas can add other host lifecycle actions. Keep every applied environment file outside the primary and additional writable workspace mounts so a sandboxed process cannot rewrite future host behavior. Only offer a version-controlled file when the repository layout preserves that boundary. Do not create one during an answer-only request.
 
-Environment files may change host state and, in v0.42 RC/main, can run `lifecycle` commands with the host user's privileges. For an unfamiliar file, use `sbx env plan` as the primary read-only inspection before applying it when that command exists. Review every host command, credential/binding, workspace, kit, port, and affected sandbox; do not suppress confirmation merely for convenience. Never commit secret values.
+Discover existing environment files, workspaces, kits, and secret conventions first. For an unfamiliar file, use `sbx env plan` as the primary read-only inspection when that command exists. Otherwise read the complete resolved configuration before applying it. Review every host command or secret resolver, credential/binding, MCP registration, workspace, kit, port, and affected sandbox; do not suppress confirmation merely for convenience. Never commit secret values.
 
-## Sandbox skills (v0.42 RC/main)
+v0.42.0-rc3 binds the environment file read-only into the sandbox it describes. That reduces post-launch modification risk but does not make an untrusted file safe: `sbx` still evaluates its host-side declarations. v0.39 lacks this mitigation, so the outside-writable-mount requirement is essential.
+
+## Sandbox skills
 
 When `sbx skills --help` exists, use it as the source of truth for `add`, `update`, `ls`, `rm`, and `import`. Skill installation happens on the host; sharing makes selected skills visible in a sandbox but does not grant its agent access to the host `sbx` CLI.
 
-Newer environment workflows share imported skills read-only by default and expose `--skills=off|readonly|readwrite`. Prefer `readonly`; use `readwrite` only when the user intends sandbox changes to propagate to the shared store. Do not offer this surface on stable versions whose help lacks it.
+The 2026-09-01 nightly adds read-only skill-sharing behavior beyond v0.42.0-rc3. Prefer read-only sharing when installed help supports it; use read-write only when the user intends sandbox changes to propagate to the shared store. Do not offer flags or semantics whose installed help is absent. See the dated [compatibility snapshot](compatibility.md).
 
 ## Choose the reusable layer
 

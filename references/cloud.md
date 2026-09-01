@@ -1,6 +1,6 @@
 # Cloud operations
 
-Use this route only when the user requests cloud Sandboxes and installed help exposes `--cloud` or equivalent current syntax. Cloud is not part of stable v0.39; consult the installed channel's help and matching [`sbx-releases`](https://github.com/docker/sbx-releases/releases) notes.
+Use this route only when the user requests cloud Sandboxes and installed help exposes `--cloud` or equivalent syntax. v0.39 does not include cloud operations; v0.42.0-rc3 and the 2026-09-01 nightly contain prerelease cloud behavior. Consult installed help, matching [`sbx-releases`](https://github.com/docker/sbx-releases/releases) notes, and the dated [compatibility snapshot](compatibility.md) without presenting prerelease behavior as stable.
 
 Do not apply local-daemon assumptions to cloud operations. Before acting, inspect help for the exact operation and establish:
 
